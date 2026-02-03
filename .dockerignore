@@ -1,0 +1,43 @@
+data/
+output/
+
+# Node.js
+node_modules
+
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+._*
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Data & outputs (we'll mount these as volumes)
+data/
+output/
+
+# Documentation
+README.md
+docs/
+
+# Tests
+tests/
+*.test.js
