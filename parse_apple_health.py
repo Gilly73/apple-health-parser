@@ -17,14 +17,17 @@ WORKOUT_TYPE_MAP = {
     'HKWorkoutActivityTypeCycling': 'Cycling',
     'HKWorkoutActivityTypeHighIntensityIntervalTraining': 'HIIT',
     'HKWorkoutActivityTypeCardio': 'Cardio',
+    'HKWorkoutActivityTypeMixedCardio': 'Mixed Cardio',
     'HKWorkoutActivityTypePilates': 'Pilates',
     'HKWorkoutActivityTypeRunning': 'Running',
     'HKWorkoutActivityTypeWalking': 'Walking',
     'HKWorkoutActivityTypeSwimming': 'Swimming',
     'HKWorkoutActivityTypeElliptical': 'Elliptical',
     'HKWorkoutActivityTypeStairs': 'Stairs',
+    'HKWorkoutActivityTypeStairClimbing': 'Stair Climbing',
     'HKWorkoutActivityTypeCoreTraining': 'Core',
     'HKWorkoutActivityTypeFunctionalStrengthTraining': 'Functional Strength',
+    'HKWorkoutActivityTypeHiking': 'Hiking',
     'HKWorkoutActivityTypeOther': 'Other',
 }
 
