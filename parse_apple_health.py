@@ -7,7 +7,6 @@ Handles large files efficiently with streaming
 import xml.etree.ElementTree as ET
 import csv
 import sys
-from datetime import datetime
 from pathlib import Path
 
 # Mapping of Apple workout types to readable names
@@ -26,6 +25,7 @@ WORKOUT_TYPE_MAP = {
     'HKWorkoutActivityTypeStairs': 'Stairs',
     'HKWorkoutActivityTypeCoreTraining': 'Core',
     'HKWorkoutActivityTypeFunctionalStrengthTraining': 'Functional Strength',
+    'HKWorkoutActivityTypeOther': 'Other',
 }
 
 def parse_duration(duration_str, duration_unit):
@@ -112,26 +112,34 @@ def main():
 
         for event, elem in context:
             if elem.tag == 'Workout':
-                print(f" elem tage: {elem.tag}")
                 try:
-                    # Extract attributes
+                    # Extract workout-level attributes
                     activity_type = elem.get('workoutActivityType', 'Unknown')
                     duration = elem.get('duration', '0')
                     duration_unit = elem.get('durationUnit', 'min')
-                    total_energy = elem.get('totalEnergyBurned', '0')
-                    energy_unit = elem.get('totalEnergyBurnedUnit', 'kcal')
                     start_date = elem.get('startDate', '')
                     end_date = elem.get('endDate', '')
                     source = elem.get('sourceName', 'Unknown')
 
-                    # Parse values
+                    # Parse duration
                     duration_min = parse_duration(duration, duration_unit)
-                    calories = parse_energy(total_energy, energy_unit)
+
+                    # Extract energy from WorkoutStatistics child element
+                    calories = 0
+                    for stat in elem.findall('WorkoutStatistics'):
+                        stat_type = stat.get('type', '')
+                        if stat_type == 'HKQuantityTypeIdentifierActiveEnergyBurned':
+                            energy_sum = stat.get('sum', '0')
+                            energy_unit = stat.get('unit', 'kcal')
+                            calories = parse_energy(energy_sum, energy_unit)
+                            break  # Found the energy, stop looking
+
+                    # Extract date and time
                     date = extract_date(start_date)
                     time = extract_time(start_date)
 
-                    # Only include workouts with calories data
-                    if calories > 0:
+                    # Only include workouts with calories data and valid dates
+                    if calories > 0 and date:
                         workout_type = WORKOUT_TYPE_MAP.get(activity_type, activity_type)
 
                         workouts.append({
@@ -164,6 +172,7 @@ def main():
 
     if not workouts:
         print("❌ No workouts found in the XML file")
+        print("⚠️  Make sure your export.xml contains Workout elements with HKQuantityTypeIdentifierActiveEnergyBurned statistics")
         sys.exit(1)
 
     # Sort by date
@@ -194,12 +203,17 @@ def main():
 
         # Workout type breakdown
         type_counts = {}
+        type_calories = {}
         for w in workouts:
-            type_counts[w['Type']] = type_counts.get(w['Type'], 0) + 1
+            wtype = w['Type']
+            type_counts[wtype] = type_counts.get(wtype, 0) + 1
+            type_calories[wtype] = type_calories.get(wtype, 0) + w['Calories (kcal)']
 
         print(f"   • Workout Types:")
         for wtype, count in sorted(type_counts.items(), key=lambda x: x[1], reverse=True):
-            print(f"     - {wtype}: {count}")
+            total_cal = type_calories[wtype]
+            avg_cal = total_cal / count
+            print(f"     - {wtype}: {count} workouts, {total_cal:,} kcal total, {avg_cal:.0f} kcal avg")
 
         print(f"\n💾 File saved: {output_file}")
         print(f"📤 You can now upload this CSV to the web app!")
