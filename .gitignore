@@ -96,3 +96,5 @@ htmlcov/
 # Misc
 *.tmp
 .cache
+
+nginx.conf
