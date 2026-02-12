@@ -1,4 +1,18 @@
 services:
+  parser:
+      build: ./parser
+      container_name: apple-health-parser
+      volumes:
+        - ./data:/app/data
+        - ./output:/app/output
+      environment:
+        - PYTHONUNBUFFERED=1
+      command: python parse_apple_health.py /app/data/export.xml
+      networks:
+        - apple-health-network
+      profiles:
+        - parser #Parser won't run by default - to run it: docker-compose --profile parser up parser #Keeps it separate from main services
+
   nginx:
     image: nginx:alpine
     container_name: apple-health-nginx
